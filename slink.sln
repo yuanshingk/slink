@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.29503.13
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "slink", "slink\slink.csproj", "{BDB79667-0831-4AFF-B8F8-E1FC467E1013}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{BDB79667-0831-4AFF-B8F8-E1FC467E1013}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BDB79667-0831-4AFF-B8F8-E1FC467E1013}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BDB79667-0831-4AFF-B8F8-E1FC467E1013}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BDB79667-0831-4AFF-B8F8-E1FC467E1013}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {17AB191A-388B-4C1D-AE22-48CC7E94E94E}
+	EndGlobalSection
+EndGlobal
