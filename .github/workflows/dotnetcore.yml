@@ -1,0 +1,25 @@
+name: .NET Core
+
+on: [push]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v1
+    - name: Setup .NET Core
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: 3.0.100
+    - name: Build with dotnet
+      run: dotnet build --configuration Release
+    - name: dotnet publish
+      run: |
+        dotnet publish -c Release -o slink
+    - uses: azure/webapps-deploy@v1
+      with:
+        app-name: slinkapp
+        publish-profile: ${{ secrets.SLINK_PUBLISH_PROFILE }}
+        package: './slink'
