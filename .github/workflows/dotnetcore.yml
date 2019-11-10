@@ -20,7 +20,7 @@ jobs:
       run: dotnet build --configuration Release
     - name: dotnet publish
       run: |
-        dotnet publish ~/home/runner/work/slink/slink/SLink/SLink.csproj -c Release -o slink
+        dotnet publish /home/runner/work/slink/slink/SLink/SLink.csproj -c Release -o slink
     - uses: azure/webapps-deploy@v1
       with:
         app-name: slinkapp
