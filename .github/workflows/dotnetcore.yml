@@ -22,6 +22,6 @@ jobs:
         dotnet publish -c Release -o slink
     - uses: azure/webapps-deploy@v1
       with:
-        app-name: slinkapp
+        app-name: slinkweb
         publish-profile: ${{ secrets.SLINK_PUBLISH_PROFILE }}
         package: './slink'
