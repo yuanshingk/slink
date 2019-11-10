@@ -3,10 +3,6 @@ using Moq;
 using SLink.APIControllers;
 using SLink.Models;
 using SLink.Services;
-using System;
-using System.Collections.Generic;
-using System.Net;
-using System.Text;
 using System.Threading.Tasks;
 using Xunit;
 
@@ -28,10 +24,10 @@ namespace SLink.UnitTest.APIControllers
         [InlineData("http://www.google.com/search?term=What%20day%20is%20today%3Fanswer%3DI%20Don%27t%20know", "http://www.google.com/search?term=What day is today?answer=I Don't know")]
         public async Task CreateShortLink_ValidUrlFormat_CallShortLinkService(string actualUrl, string expectedUrl)
         {
-            _shortLinkServiceMock.Setup(s => s.CreateShortLink(expectedUrl)).Returns(Task.FromResult(expectedUrl));
+            _shortLinkServiceMock.Setup(s => s.CreateShortLink(expectedUrl)).ReturnsAsync(expectedUrl);
             
             var sut = new ShortLinkController(_shortLinkServiceMock.Object);
-            var result = await sut.CreateShortLink(new CreateShortLinkRequest { UrlString = actualUrl });
+            var result = await sut.CreateShortLink(new CreateShortLinkRequest { UrlString = actualUrl }).ConfigureAwait(false);
 
             _shortLinkServiceMock.VerifyAll();
             Assert.Equal(expectedUrl, result.Value);
@@ -41,7 +37,7 @@ namespace SLink.UnitTest.APIControllers
         public async Task CreateShortLink_InvalidUrlFormat_ReturnBadRequestResponse()
         {
             var sut = new ShortLinkController(_shortLinkServiceMock.Object);
-            var result = await sut.CreateShortLink(new CreateShortLinkRequest { UrlString = "xyz" });
+            var result = await sut.CreateShortLink(new CreateShortLinkRequest { UrlString = "xyz" }).ConfigureAwait(false);
 
             var statusCodeResult = result.Result as StatusCodeResult;
             Assert.Equal(400, statusCodeResult.StatusCode);

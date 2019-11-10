@@ -23,7 +23,7 @@ namespace SLink.APIControllers
             if (result)
             {
                 var unescapedUri = Uri.UnescapeDataString(uri.ToString());
-                return await _shortLinkService.CreateShortLink(unescapedUri);
+                return await _shortLinkService.CreateShortLink(unescapedUri).ConfigureAwait(false);
             }
             return BadRequest();
         }
