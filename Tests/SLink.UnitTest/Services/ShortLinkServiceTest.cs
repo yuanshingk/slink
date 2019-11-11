@@ -1,6 +1,6 @@
 ﻿using HashidsNet;
 using Moq;
-using SLink.Repositories;
+using SLink.Providers;
 using SLink.Services;
 using System.Threading.Tasks;
 using Xunit;
@@ -9,56 +9,68 @@ namespace SLink.UnitTest.Services
 {
     public class ShortLinkServiceTest
     {
-        private Mock<IRepository> _repositoryMock;
+        private Mock<IDataProvider> _dataProviderMock;
         private Mock<IHashids> _hashidsMock;
 
         public ShortLinkServiceTest()
         {
-            _repositoryMock = new Mock<IRepository>();
+            _dataProviderMock = new Mock<IDataProvider>();
             _hashidsMock = new Mock<IHashids>();
         }
 
-        [Theory]
+        [Theory(DisplayName = "Invalid Input")]
         [InlineData("  ")]
         [InlineData("")]
         [InlineData(null)]
         public async Task CreateShortLink_InvalidInputUrl_ReturnNull(string inputUrl)
         {
-            var sut = new ShortLinkService(_repositoryMock.Object, _hashidsMock.Object);
+            var sut = new ShortLinkService(_dataProviderMock.Object, _hashidsMock.Object);
             var result = await sut.CreateShortLink(inputUrl).ConfigureAwait(false);
 
             Assert.Null(result);
         }
 
         [Fact]
-        public async Task CreateSHortLink_UrlExistingInRepository_ReturnShortLinkWithoutInsertToRepository()
+        public async Task CreateSHortLink_DataProviderReturnExistingId_ReturnShortLink()
         {
-            _repositoryMock.Setup(x => x.GetUrlId(It.IsAny<string>())).ReturnsAsync(10);
+            _dataProviderMock.Setup(x => x.GetUrlId(It.IsAny<string>())).ReturnsAsync(10);
             _hashidsMock.Setup(x => x.Encode(10)).Returns("XYUNWEGFIH");
 
-            var sut = new ShortLinkService(_repositoryMock.Object, _hashidsMock.Object);
+            var sut = new ShortLinkService(_dataProviderMock.Object, _hashidsMock.Object);
             var result = await sut.CreateShortLink("https://dummy.com").ConfigureAwait(false);
 
             Assert.NotNull(result);
             Assert.Equal("https://slinkweb.azurewebsites.net/XYUNWEGFIH", result);
-            _repositoryMock.Verify(x => x.InsertUrlRecord(It.IsAny<string>()), Times.Never);
+            _dataProviderMock.Verify(x => x.CreateUrlId(It.IsAny<string>()), Times.Never);
             _hashidsMock.VerifyAll();
         }
 
         [Fact]
-        public async Task CreateSHortLink_UrlNotFoundInRepository_ReturnShortLinkAndInsertToRepository()
+        public async Task CreateSHortLink_DataProviderDoesNotReturnId_CreateUrlIdAndReturnShortLink()
         {
-            _repositoryMock.Setup(x => x.GetUrlId(It.IsAny<string>())).ReturnsAsync((int?)null);
-            _repositoryMock.Setup(x => x.InsertUrlRecord("https://dummy.com")).ReturnsAsync(100);
+            _dataProviderMock.Setup(x => x.GetUrlId(It.IsAny<string>())).ReturnsAsync((int?)null);
+            _dataProviderMock.Setup(x => x.CreateUrlId("https://dummy.com")).ReturnsAsync(100);
             _hashidsMock.Setup(x => x.Encode(100)).Returns("U78BCWEGFIH");
 
-            var sut = new ShortLinkService(_repositoryMock.Object, _hashidsMock.Object);
+            var sut = new ShortLinkService(_dataProviderMock.Object, _hashidsMock.Object);
             var result = await sut.CreateShortLink("https://dummy.com").ConfigureAwait(false);
 
             Assert.NotNull(result);
             Assert.Equal("https://slinkweb.azurewebsites.net/U78BCWEGFIH", result);
-            _repositoryMock.VerifyAll();
+            _dataProviderMock.VerifyAll();
             _hashidsMock.VerifyAll();
+        }
+
+        [Fact]
+        public async Task CreateSHortLink_DataProviderFailToCreateNewId_ReturnNull()
+        {
+            _dataProviderMock.Setup(x => x.GetUrlId(It.IsAny<string>())).ReturnsAsync((int?)null);
+            _dataProviderMock.Setup(x => x.CreateUrlId("https://dummy.com")).ReturnsAsync((int?)null);
+
+            var sut = new ShortLinkService(_dataProviderMock.Object, _hashidsMock.Object);
+            var result = await sut.CreateShortLink("https://dummy.com").ConfigureAwait(false);
+
+            Assert.Null(result);
         }
     }
 }

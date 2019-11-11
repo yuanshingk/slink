@@ -5,6 +5,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Models;
+using SLink.Providers;
 using SLink.Repositories;
 using SLink.Services;
 using System;
@@ -31,6 +32,7 @@ namespace SLink
 
             services
                 .AddSingleton<IShortLinkService, ShortLinkService>()
+                .AddSingleton<IDataProvider, DataProvider>()
                 .AddSingleton<IRepository, SqlRepository>()
                 .AddSingleton<IHashids>(new Hashids(Environment.GetEnvironmentVariable("SLINK_HASH_SALT"), 8));
         }

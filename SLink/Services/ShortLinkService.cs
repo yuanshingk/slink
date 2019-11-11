@@ -1,5 +1,5 @@
 ﻿using HashidsNet;
-using SLink.Repositories;
+using SLink.Providers;
 using System;
 using System.Threading.Tasks;
 
@@ -13,12 +13,12 @@ namespace SLink.Services
     public class ShortLinkService : IShortLinkService
     {
         private const string SLINK_BASE_URL = "https://slinkweb.azurewebsites.net/"; //TEMP
-        private readonly IRepository _sqlRepository;
+        private readonly IDataProvider _dataProvider;
         private readonly IHashids _hashids;
         
-        public ShortLinkService(IRepository sqlRepository, IHashids hashids)
+        public ShortLinkService(IDataProvider dataProvider, IHashids hashids)
         {
-            _sqlRepository = sqlRepository;
+            _dataProvider = dataProvider;
             _hashids = hashids;
         }
 
@@ -26,14 +26,17 @@ namespace SLink.Services
         {
             if (!string.IsNullOrWhiteSpace(url))
             {
-                var existingUrlId = await _sqlRepository.GetUrlId(url).ConfigureAwait(false);
+                var existingUrlId = await _dataProvider.GetUrlId(url).ConfigureAwait(false);
                 if (existingUrlId.HasValue)
                 {
                     return ComputeShortLink(existingUrlId.Value);
                 }
 
-                var newUrlId = await _sqlRepository.InsertUrlRecord(url).ConfigureAwait(false);
-                return ComputeShortLink(newUrlId);
+                var newUrlId = await _dataProvider.CreateUrlId(url).ConfigureAwait(false);
+                if (newUrlId.HasValue)
+                {
+                    return ComputeShortLink(newUrlId.Value);
+                }
             }
 
             return null;
