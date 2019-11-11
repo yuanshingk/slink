@@ -12,9 +12,6 @@
       "commandName": "IISExpress",
       "launchBrowser": true,
       "environmentVariables": {
-        "SLINK_BASE_URL": "http://localhost:59399/",
-        "SLINKDB_CONNECTIONSTRING": "Data Source=localhost;Initial Catalog=SLinkDB;Integrated Security=SSPI;",
-        "SLINK_HASH_SALT": "Test_Salt",
         "ASPNETCORE_ENVIRONMENT": "Development"
       }
     },
@@ -22,9 +19,6 @@
       "commandName": "Project",
       "launchBrowser": true,
       "environmentVariables": {
-        "SLINK_BASE_URL": "http://localhost:59399/",
-        "SLINKDB_CONNECTIONSTRING": "Data Source=localhost;Initial Catalog=SLinkDB;Integrated Security=SSPI;",
-        "SLINK_HASH_SALT": "Test_Salt",
         "ASPNETCORE_ENVIRONMENT": "Development"
       },
       "applicationUrl": "http://localhost:59399/"

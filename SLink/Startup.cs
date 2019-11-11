@@ -14,9 +14,15 @@ namespace SLink
 {
     public class Startup
     {
-        public Startup(IConfiguration configuration)
+        public Startup(IHostEnvironment env)
         {
-            Configuration = configuration;
+            var builder = new ConfigurationBuilder()
+                .SetBasePath(env.ContentRootPath)
+                .AddJsonFile("appsettings.json")
+                .AddJsonFile($"appsettings.{env.EnvironmentName}.json", optional: true);
+
+            builder.AddEnvironmentVariables();
+            Configuration = builder.Build();
         }
 
         public IConfiguration Configuration { get; }
@@ -34,7 +40,7 @@ namespace SLink
                 .AddSingleton<IShortLinkService, ShortLinkService>()
                 .AddSingleton<IDataProvider, DataProvider>()
                 .AddSingleton<IRepository, SqlRepository>()
-                .AddSingleton<IHashids>(new Hashids(Environment.GetEnvironmentVariable("SLINK_HASH_SALT"), 8));
+                .AddSingleton<IHashids>(new Hashids(Configuration.GetValue<string>("SLINK_HASH_SALT"), 8));
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

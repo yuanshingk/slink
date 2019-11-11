@@ -1,4 +1,5 @@
-﻿using SLink.Models;
+﻿using Microsoft.Extensions.Configuration;
+using SLink.Models;
 using System;
 using System.Collections.Generic;
 using System.Data.SqlClient;
@@ -17,9 +18,9 @@ namespace SLink.Repositories
     {
         private readonly string slinkDbConnectionString;
 
-        public SqlRepository()
+        public SqlRepository(IConfiguration configuration)
         {
-            slinkDbConnectionString = Environment.GetEnvironmentVariable("SLINKDB_CONNECTIONSTRING");
+            slinkDbConnectionString = configuration.GetValue<string>("SLINKDB_CONNECTIONSTRING");
         }
 
         public async Task<List<UrlRecord>> RetrieveUrlRecords(string hash)

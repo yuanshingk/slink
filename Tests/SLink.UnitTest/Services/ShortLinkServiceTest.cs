@@ -1,8 +1,10 @@
 ﻿using HashidsNet;
+using Microsoft.Extensions.Configuration;
 using Moq;
 using SLink.Providers;
 using SLink.Services;
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using Xunit;
 
@@ -12,12 +14,18 @@ namespace SLink.UnitTest.Services
     {
         private Mock<IDataProvider> _dataProviderMock;
         private Mock<IHashids> _hashidsMock;
+        private IConfigurationRoot _configurationMock;
 
         public ShortLinkServiceTest()
         {
             _dataProviderMock = new Mock<IDataProvider>();
             _hashidsMock = new Mock<IHashids>();
-            Environment.SetEnvironmentVariable("SLINK_BASE_URL", "https://slinkweb.azurewebsites.net/");
+            _configurationMock = new ConfigurationBuilder()
+                .AddInMemoryCollection(new Dictionary<string, string>
+                {
+                    { "SLINK_BASE_URL", "https://slinkweb.azurewebsites.net/" }
+                }).Build();
+            //Environment.SetEnvironmentVariable("SLINK_BASE_URL", "https://slinkweb.azurewebsites.net/");
         }
 
         #region CreateShortLink
@@ -28,7 +36,7 @@ namespace SLink.UnitTest.Services
         [InlineData(null)]
         public async Task CreateShortLink_InvalidInputUrl_ReturnNull(string inputUrl)
         {
-            var sut = new ShortLinkService(_dataProviderMock.Object, _hashidsMock.Object);
+            var sut = new ShortLinkService(_configurationMock, _dataProviderMock.Object, _hashidsMock.Object);
             var result = await sut.CreateShortLink(inputUrl).ConfigureAwait(false);
 
             Assert.Null(result);
@@ -40,7 +48,7 @@ namespace SLink.UnitTest.Services
             _dataProviderMock.Setup(x => x.GetUrlId(It.IsAny<string>())).ReturnsAsync(10);
             _hashidsMock.Setup(x => x.Encode(10)).Returns("XYUNWEGFIH");
 
-            var sut = new ShortLinkService(_dataProviderMock.Object, _hashidsMock.Object);
+            var sut = new ShortLinkService(_configurationMock, _dataProviderMock.Object, _hashidsMock.Object);
             var result = await sut.CreateShortLink("https://dummy.com").ConfigureAwait(false);
 
             Assert.NotNull(result);
@@ -56,7 +64,7 @@ namespace SLink.UnitTest.Services
             _dataProviderMock.Setup(x => x.CreateUrlId("https://dummy.com")).ReturnsAsync(100);
             _hashidsMock.Setup(x => x.Encode(100)).Returns("U78BCWEGFIH");
 
-            var sut = new ShortLinkService(_dataProviderMock.Object, _hashidsMock.Object);
+            var sut = new ShortLinkService(_configurationMock, _dataProviderMock.Object, _hashidsMock.Object);
             var result = await sut.CreateShortLink("https://dummy.com").ConfigureAwait(false);
 
             Assert.NotNull(result);
@@ -71,7 +79,7 @@ namespace SLink.UnitTest.Services
             _dataProviderMock.Setup(x => x.GetUrlId(It.IsAny<string>())).ReturnsAsync((int?)null);
             _dataProviderMock.Setup(x => x.CreateUrlId("https://dummy.com")).ReturnsAsync((int?)null);
 
-            var sut = new ShortLinkService(_dataProviderMock.Object, _hashidsMock.Object);
+            var sut = new ShortLinkService(_configurationMock, _dataProviderMock.Object, _hashidsMock.Object);
             var result = await sut.CreateShortLink("https://dummy.com").ConfigureAwait(false);
 
             Assert.Null(result);
@@ -87,7 +95,7 @@ namespace SLink.UnitTest.Services
         [InlineData(null)]
         public async Task GetOriginalUrl_InvalidHashInput_ReturnNull(string inputHash)
         {
-            var sut = new ShortLinkService(_dataProviderMock.Object, _hashidsMock.Object);
+            var sut = new ShortLinkService(_configurationMock, _dataProviderMock.Object, _hashidsMock.Object);
             var result = await sut.GetOriginalUrl(inputHash).ConfigureAwait(false);
 
             Assert.Null(result);
@@ -98,7 +106,7 @@ namespace SLink.UnitTest.Services
         {
             _hashidsMock.Setup(x => x.Decode("FDHFHH")).Returns(new int[0]);
 
-            var sut = new ShortLinkService(_dataProviderMock.Object, _hashidsMock.Object);
+            var sut = new ShortLinkService(_configurationMock, _dataProviderMock.Object, _hashidsMock.Object);
             var result = await sut.GetOriginalUrl("FDHFHH").ConfigureAwait(false);
 
             Assert.Null(result);
@@ -109,7 +117,7 @@ namespace SLink.UnitTest.Services
         {
             _hashidsMock.Setup(x => x.Decode("FDHFHH")).Returns((int[])null);
 
-            var sut = new ShortLinkService(_dataProviderMock.Object, _hashidsMock.Object);
+            var sut = new ShortLinkService(_configurationMock, _dataProviderMock.Object, _hashidsMock.Object);
             var result = await sut.GetOriginalUrl("FDHFHH").ConfigureAwait(false);
 
             Assert.Null(result);
@@ -121,7 +129,7 @@ namespace SLink.UnitTest.Services
             _hashidsMock.Setup(x => x.Decode("FDHFHH")).Returns(new int[] { 1, 2, 3});
             _dataProviderMock.Setup(x => x.GetOriginalUrl(1)).ReturnsAsync("https://dummy.com");
 
-            var sut = new ShortLinkService(_dataProviderMock.Object, _hashidsMock.Object);
+            var sut = new ShortLinkService(_configurationMock, _dataProviderMock.Object, _hashidsMock.Object);
             var result = await sut.GetOriginalUrl("FDHFHH").ConfigureAwait(false);
 
             Assert.Equal("https://dummy.com", result);

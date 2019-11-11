@@ -1,4 +1,5 @@
 ﻿using HashidsNet;
+using Microsoft.Extensions.Configuration;
 using SLink.Providers;
 using System;
 using System.Linq;
@@ -16,9 +17,11 @@ namespace SLink.Services
     {
         private readonly IDataProvider _dataProvider;
         private readonly IHashids _hashids;
+        private readonly IConfiguration _configuration;
         
-        public ShortLinkService(IDataProvider dataProvider, IHashids hashids)
+        public ShortLinkService(IConfiguration configuration, IDataProvider dataProvider, IHashids hashids)
         {
+            _configuration = configuration;
             _dataProvider = dataProvider;
             _hashids = hashids;
         }
@@ -60,7 +63,7 @@ namespace SLink.Services
         private string ComputeShortLink(int urlId)
         {
             var hash = _hashids.Encode(urlId);
-            var baseUrl = Environment.GetEnvironmentVariable("SLINK_BASE_URL");
+            var baseUrl = _configuration.GetValue<string>("SLINK_BASE_URL");
             if (Uri.TryCreate(new Uri(baseUrl), hash, out var finalUrl))
             {
                 return finalUrl.ToString();
