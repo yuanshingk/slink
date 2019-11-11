@@ -8,7 +8,6 @@ using Microsoft.OpenApi.Models;
 using SLink.Providers;
 using SLink.Repositories;
 using SLink.Services;
-using System.Diagnostics.CodeAnalysis;
 
 namespace SLink
 {
@@ -44,7 +43,6 @@ namespace SLink
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        [ExcludeFromCodeCoverage]
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
             if (env.IsDevelopment())
