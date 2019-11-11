@@ -7,7 +7,6 @@ using System.Threading.Tasks;
 namespace SLink.APIControllers
 {
     [ApiController]
-    [Route("api/shortlink")]
     public class ShortLinkController : ControllerBase
     {
         private readonly IShortLinkService _shortLinkService;
@@ -16,7 +15,7 @@ namespace SLink.APIControllers
             _shortLinkService = shortLinkService;
         }
 
-        [HttpPost]
+        [HttpPost("api/shortlink")]
         public async Task<ActionResult<string>> CreateShortLink([FromForm]CreateShortLinkRequest request)
         {
             bool result = Uri.TryCreate(request.UrlString.Trim(), UriKind.Absolute, out var uri);
@@ -25,6 +24,31 @@ namespace SLink.APIControllers
                 var unescapedUri = Uri.UnescapeDataString(uri.ToString());
                 return await _shortLinkService.CreateShortLink(unescapedUri).ConfigureAwait(false);
             }
+
+            return BadRequest();
+        }
+
+        [HttpGet("api/shortlink/{hashid}")]
+        public async Task<ActionResult<string>> RetrieveOriginalUrl(string hashid)
+        {
+            var originalUrl = await _shortLinkService.GetOriginalUrl(hashid).ConfigureAwait(false);
+            if (originalUrl != null)
+            {
+                return originalUrl;
+            }
+
+            return NotFound();
+        }
+
+        [HttpGet("{hashid}")]
+        public async Task<ActionResult<string>> GotoShortLinkOriginalAddress(string hashid)
+        {
+            var originalUrl = await _shortLinkService.GetOriginalUrl(hashid).ConfigureAwait(false);
+            if (originalUrl != null)
+            {
+                return Redirect(originalUrl);
+            }
+
             return BadRequest();
         }
     }

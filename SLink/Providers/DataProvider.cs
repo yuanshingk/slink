@@ -10,6 +10,7 @@ namespace SLink.Providers
     {
         Task<int?> GetUrlId(string url);
         Task<int?> CreateUrlId(string url);
+        Task<string> GetOriginalUrl(int urlId);
     }
 
     public class DataProvider : IDataProvider
@@ -43,6 +44,11 @@ namespace SLink.Providers
             }
 
             return null;
+        }
+
+        public async Task<string> GetOriginalUrl(int urlId)
+        {
+            return await _repository.RetrieveUrl(urlId).ConfigureAwait(false);
         }
 
         private string ComputeMd5Hash(string input)

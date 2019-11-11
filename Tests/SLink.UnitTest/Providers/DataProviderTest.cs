@@ -117,5 +117,21 @@ namespace SLink.UnitTest.Providers
         }
 
         #endregion
+
+        #region GetOriginalUrl
+
+        [Fact]
+        public async Task GetOriginalUrl_RetrieveOriginalUrlFromProvider_ReturnOriginalUrl()
+        {
+            _repositoryMock.Setup(r => r.RetrieveUrl(100)).ReturnsAsync("http://dummy.com");
+
+            var sut = new DataProvider(_repositoryMock.Object);
+            var result = await sut.GetOriginalUrl(100).ConfigureAwait(false);
+
+            Assert.Equal("http://dummy.com", result);
+            _repositoryMock.VerifyAll();
+        }
+
+        #endregion
     }
 }

@@ -1,6 +1,7 @@
 ﻿using HashidsNet;
 using SLink.Providers;
 using System;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace SLink.Services
@@ -8,11 +9,11 @@ namespace SLink.Services
     public interface IShortLinkService
     {
         Task<string> CreateShortLink(string url);
+        Task<string> GetOriginalUrl(string hashid);
     }
 
     public class ShortLinkService : IShortLinkService
     {
-        private const string SLINK_BASE_URL = "https://slinkweb.azurewebsites.net/"; //TEMP
         private readonly IDataProvider _dataProvider;
         private readonly IHashids _hashids;
         
@@ -42,10 +43,25 @@ namespace SLink.Services
             return null;
         }
 
+        public async Task<string> GetOriginalUrl(string hashid)
+        {
+            if (!string.IsNullOrWhiteSpace(hashid))
+            {
+                var urlId = _hashids.Decode(hashid);
+                if (urlId != null && urlId.Any())
+                {
+                    return await _dataProvider.GetOriginalUrl(urlId.First());
+                }
+            }
+
+            return null;
+        }
+
         private string ComputeShortLink(int urlId)
         {
             var hash = _hashids.Encode(urlId);
-            if (Uri.TryCreate(new Uri(SLINK_BASE_URL), hash, out var finalUrl))
+            var baseUrl = Environment.GetEnvironmentVariable("SLINK_BASE_URL");
+            if (Uri.TryCreate(new Uri(baseUrl), hash, out var finalUrl))
             {
                 return finalUrl.ToString();
             }

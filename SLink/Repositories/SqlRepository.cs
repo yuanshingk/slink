@@ -10,6 +10,7 @@ namespace SLink.Repositories
     {
         Task<List<UrlRecord>> RetrieveUrlRecords(string hash);
         Task<int> InsertUrlRecord(string url, string hash);
+        Task<string> RetrieveUrl(int urlId);
     }
 
     public class SqlRepository : IRepository
@@ -65,6 +66,28 @@ namespace SLink.Repositories
                     return Convert.ToInt32(commandOutput);
                 }
             }
+        }
+
+        public async Task<string> RetrieveUrl(int urlId)
+        {
+            string commandText = "SELECT * FROM dbo.UrlRecords WHERE Id=@Id";
+            using (var connection = new SqlConnection(slinkDbConnectionString))
+            {
+                await connection.OpenAsync().ConfigureAwait(false);
+                using (SqlCommand command = new SqlCommand(commandText, connection))
+                {
+                    command.Parameters.AddWithValue("@Id", urlId);
+                    using (SqlDataReader reader = await command.ExecuteReaderAsync())
+                    {
+                        while (reader.Read())
+                        {
+                            return reader.GetFieldValue<string>(reader.GetOrdinal("OriginalUrl"));
+                        }
+                    }
+                }
+            }
+
+            return null;
         }
     }
 }

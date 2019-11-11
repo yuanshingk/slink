@@ -2,6 +2,7 @@
 using Moq;
 using SLink.Providers;
 using SLink.Services;
+using System;
 using System.Threading.Tasks;
 using Xunit;
 
@@ -16,7 +17,10 @@ namespace SLink.UnitTest.Services
         {
             _dataProviderMock = new Mock<IDataProvider>();
             _hashidsMock = new Mock<IHashids>();
+            Environment.SetEnvironmentVariable("SLINK_BASE_URL", "https://slinkweb.azurewebsites.net/");
         }
+
+        #region CreateShortLink
 
         [Theory(DisplayName = "Invalid Input")]
         [InlineData("  ")]
@@ -72,5 +76,57 @@ namespace SLink.UnitTest.Services
 
             Assert.Null(result);
         }
+
+        #endregion
+
+        #region GetOriginalUrl
+
+        [Theory(DisplayName = "Invalid Input")]
+        [InlineData("  ")]
+        [InlineData("")]
+        [InlineData(null)]
+        public async Task GetOriginalUrl_InvalidHashInput_ReturnNull(string inputHash)
+        {
+            var sut = new ShortLinkService(_dataProviderMock.Object, _hashidsMock.Object);
+            var result = await sut.GetOriginalUrl(inputHash).ConfigureAwait(false);
+
+            Assert.Null(result);
+        }
+
+        [Fact]
+        public async Task GetOriginalUrl_DecoderReturnsNoUrlId_ReturnNull()
+        {
+            _hashidsMock.Setup(x => x.Decode("FDHFHH")).Returns(new int[0]);
+
+            var sut = new ShortLinkService(_dataProviderMock.Object, _hashidsMock.Object);
+            var result = await sut.GetOriginalUrl("FDHFHH").ConfigureAwait(false);
+
+            Assert.Null(result);
+        }
+
+        [Fact]
+        public async Task GetOriginalUrl_DecoderReturnsNull_ReturnNull()
+        {
+            _hashidsMock.Setup(x => x.Decode("FDHFHH")).Returns((int[])null);
+
+            var sut = new ShortLinkService(_dataProviderMock.Object, _hashidsMock.Object);
+            var result = await sut.GetOriginalUrl("FDHFHH").ConfigureAwait(false);
+
+            Assert.Null(result);
+        }
+
+        [Fact]
+        public async Task GetOriginalUrl_DecoderReturnsUrlIds_ReturnOriginalUrlOfTheFirstUrlId()
+        {
+            _hashidsMock.Setup(x => x.Decode("FDHFHH")).Returns(new int[] { 1, 2, 3});
+            _dataProviderMock.Setup(x => x.GetOriginalUrl(1)).ReturnsAsync("https://dummy.com");
+
+            var sut = new ShortLinkService(_dataProviderMock.Object, _hashidsMock.Object);
+            var result = await sut.GetOriginalUrl("FDHFHH").ConfigureAwait(false);
+
+            Assert.Equal("https://dummy.com", result);
+        }
+
+        #endregion
     }
 }

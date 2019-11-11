@@ -43,5 +43,56 @@ namespace SLink.UnitTest.APIControllers
             Assert.Equal(400, statusCodeResult.StatusCode);
             _shortLinkServiceMock.Verify(s => s.CreateShortLink(It.IsAny<string>()), Times.Never);
         }
+
+        [Fact]
+        public async Task RetrieveOriginalUrl_HashIdIsMatchingRecords_ReturnOriginalUrl()
+        {
+            _shortLinkServiceMock.Setup(s => s.GetOriginalUrl("XUDH")).ReturnsAsync("https://dummy.com");
+
+            var sut = new ShortLinkController(_shortLinkServiceMock.Object);
+            var result = await sut.RetrieveOriginalUrl("XUDH").ConfigureAwait(false);
+
+            _shortLinkServiceMock.VerifyAll();
+            Assert.Equal("https://dummy.com", result.Value);
+        }
+
+        [Fact]
+        public async Task RetrieveOriginalUrl_HashIdIsNotMatchingRecords_ReturnNotFound()
+        {
+            _shortLinkServiceMock.Setup(s => s.GetOriginalUrl(It.IsAny<string>())).ReturnsAsync((string)null);
+
+            var sut = new ShortLinkController(_shortLinkServiceMock.Object);
+            var result = await sut.RetrieveOriginalUrl("XUDH").ConfigureAwait(false);
+
+            var statusCodeResult = result.Result as StatusCodeResult;
+            Assert.Equal(404, statusCodeResult.StatusCode);
+        }
+
+
+        [Fact]
+        public async Task GotoShortLinkOriginalAddress_HashIdIsMatchingRecords_RedirectToUrlAddress()
+        {
+            _shortLinkServiceMock.Setup(s => s.GetOriginalUrl("XUDH")).ReturnsAsync("https://dummy.com");
+
+            var sut = new ShortLinkController(_shortLinkServiceMock.Object);
+            var result = await sut.GotoShortLinkOriginalAddress("XUDH").ConfigureAwait(false);
+
+            _shortLinkServiceMock.VerifyAll();
+            var redirectResult = result.Result as RedirectResult;
+            Assert.NotNull(redirectResult);
+            Assert.Equal("https://dummy.com", redirectResult.Url);
+        }
+
+        [Fact]
+        public async Task GotoShortLinkOriginalAddress_HashIdIsNotMatchingRecords_ReturnBadRequest()
+        {
+            _shortLinkServiceMock.Setup(s => s.GetOriginalUrl(It.IsAny<string>())).ReturnsAsync((string)null);
+
+            var sut = new ShortLinkController(_shortLinkServiceMock.Object);
+            var result = await sut.GotoShortLinkOriginalAddress("XUDH").ConfigureAwait(false);
+
+            var statusCodeResult = result.Result as StatusCodeResult;
+            Assert.Equal(400, statusCodeResult.StatusCode);
+        }
     }
 }
