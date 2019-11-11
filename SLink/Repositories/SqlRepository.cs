@@ -3,6 +3,7 @@ using SLink.Models;
 using System;
 using System.Collections.Generic;
 using System.Data.SqlClient;
+using System.Diagnostics.CodeAnalysis;
 using System.Threading.Tasks;
 
 namespace SLink.Repositories
@@ -14,6 +15,7 @@ namespace SLink.Repositories
         Task<string> RetrieveUrl(int urlId);
     }
 
+    [ExcludeFromCodeCoverage]
     public class SqlRepository : IRepository
     {
         private readonly string slinkDbConnectionString;

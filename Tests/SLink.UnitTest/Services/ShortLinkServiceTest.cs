@@ -25,7 +25,6 @@ namespace SLink.UnitTest.Services
                 {
                     { "SLINK_BASE_URL", "https://slinkweb.azurewebsites.net/" }
                 }).Build();
-            //Environment.SetEnvironmentVariable("SLINK_BASE_URL", "https://slinkweb.azurewebsites.net/");
         }
 
         #region CreateShortLink
