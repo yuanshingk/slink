@@ -4,6 +4,8 @@
 
 <div>
     <h1 class="display-4">slink API</h1>
+
+    <h4>Create Short Link</h4>
     <div class="input-group mb-3">
         <input type="text" class="form-control" id="user-url" placeholder="Your url to shorten" aria-describedby="shorten-button">
         <div class="input-group-append">
@@ -16,6 +18,21 @@
             <span class="input-group-text">short Link</span>
         </div>
         <input type="text" class="form-control" id="shorten-url" readonly style="background-color: #fff">
+    </div>
+
+    <h4>Retrieve Original Link</h4>
+    <div class="input-group mb-3">
+        <input type="text" class="form-control" id="exiting-short-url" placeholder="Short link" aria-describedby="shorten-button">
+        <div class="input-group-append">
+            <button class="btn btn-outline-secondary" type="button" id="retrieve-button" onclick="RetrieveOriginalLink()">Retrieve</button>
+        </div>
+    </div>
+
+    <div class="input-group mb-3">
+        <div class="input-group-prepend">
+            <span class="input-group-text">Original Link</span>
+        </div>
+        <input type="text" class="form-control" id="original-url" readonly style="background-color: #fff">
     </div>
 </div>
 
@@ -42,6 +59,29 @@
         }
     }
 
+    function RetrieveOriginalLink() {
+        let outputElement = $("#original-url");
+        outputElement.val("");
+        let input = $("#exiting-short-url").val();
+        if (input) {
+            var hashid = getHashid(input);
+            $.get(`/api/shortlink/${hashid}`,
+                function (data) {
+                    if (data) {
+                        outputElement.val(data);
+                    }
+                })
+                .fail(function (data) {
+                    alert("the url you entered is not available in the system");
+                });
+        }
+    }
+
+    function getHashid(url) {
+        var a = document.createElement('a');
+        a.href = url;
+        return a.pathname.replace("/", "");
+    }
 </script>
 
 <style>

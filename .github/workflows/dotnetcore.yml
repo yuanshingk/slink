@@ -18,7 +18,9 @@ jobs:
         dotnet-version: 3.0.100
     - name: Build with dotnet
       run: dotnet build --configuration Release
-    - name: dotnet publish
+    - name: Unit tests
+      run: dotnet test
+    - name: Dotnet publish
       run: |
         dotnet publish /home/runner/work/slink/slink/SLink/SLink.csproj -c Release -o slink
     - uses: azure/webapps-deploy@v1
